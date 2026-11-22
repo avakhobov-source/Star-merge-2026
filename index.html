@@ -20,7 +20,7 @@ try{tg=window.Telegram&&window.Telegram.WebApp;if(tg){tg.ready();tg.expand();try
 var cv=document.getElementById('c'),ctx=cv.getContext('2d'),W,H,D;
 function resize(){D=window.devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);}
 addEventListener('resize',resize);resize();
-var SHARE_URL='';
+var SHARE_URL='https://t.me/star_merge_game_bot/Merge';
 function myName(){try{var u=tg.initDataUnsafe.user;if(u&&u.first_name)return u.first_name.slice(0,12);}catch(e){}return 'Игрок';}
 function enc(o){try{return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}catch(e){return '';}}
 function dec(q){try{q=q.replace(/-/g,'+').replace(/_/g,'/');while(q.length%4)q+='=';var o=JSON.parse(decodeURIComponent(escape(atob(q))));if(o&&o.s>0&&o.p>=0)return {seed:o.s,score:o.p,name:String(o.n||'Игрок').slice(0,12)};}catch(e){}return null;}
