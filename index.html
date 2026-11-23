@@ -45,13 +45,36 @@ function open(){if(!el)build();el.style.display='flex';paint();load(paint);}
 function close(){if(el)el.style.display='none';}
 return {open:open,submit:submit};
 })();
+var REF=(function(){
+var URL_='https://goxmwpjepbfeyxchdtce.supabase.co/rest/v1/scores',KEY='sb_publishable_MoDF_SQuqqlB59Txr3imug_eWsMhnfP';
+function T(){try{return window.Telegram&&window.Telegram.WebApp;}catch(e){return null;}}
+function id(){try{var u=T().initDataUnsafe.user;if(u&&u.id)return String(u.id);}catch(e){}return '';}
+function nm(){try{var u=T().initDataUnsafe.user;if(u&&u.first_name)return u.first_name.slice(0,12);}catch(e){}return 'Игрок';}
+function hd(x){var h={apikey:KEY,'Content-Type':'application/json'};if(x)for(var k in x)h[k]=x[k];return h;}
+function startParam(){try{return T().initDataUnsafe.start_param||'';}catch(e){return '';}}
+function fromParam(sp){return /^r\d+$/.test(sp||'')?sp.slice(1):'';}
+function link(base){var me=id();return (me&&base)?base+'?startapp=r'+me:base;}
+function register(inv){
+  try{if(!inv||!id()||inv===id())return;if(localStorage.getItem('ref_done'))return;}catch(e){return;}
+  fetch(URL_+'?on_conflict=game,user_id',{method:'POST',headers:hd({Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify({game:'ref:'+inv,user_id:id(),name:nm(),score:1})}).then(function(r){if(r.ok){try{localStorage.setItem('ref_done','1');}catch(e){}}}).catch(function(){});
+}
+function claim(key,cb){
+  var me=id();if(!me)return;
+  fetch(URL_+'?game=eq.ref:'+me+'&select=user_id',{headers:hd()}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(a){
+    var n=a.length,k='ref_claimed_'+key,d=0;try{d=+localStorage.getItem(k)||0;}catch(e){}
+    if(n>d){try{localStorage.setItem(k,String(n));}catch(e){}cb(n-d);}
+  }).catch(function(){});
+}
+return {id:id,link:link,register:register,claim:claim,fromParam:fromParam,startParam:startParam};
+})();
+setTimeout(function(){try{REF.register((chal&&chal.r)||REF.fromParam(sp));REF.claim('starmerge',function(n){S.boomBonus=(S.boomBonus||0)+n;save();toast('Друг пришёл! +'+n+' 💥 в следующей игре');});}catch(e){console.log("REFERR "+e)}},700);
 var cv=document.getElementById('c'),ctx=cv.getContext('2d'),W,H,D;
 function resize(){D=window.devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*D;cv.height=H*D;ctx.setTransform(D,0,0,D,0,0);}
 addEventListener('resize',resize);resize();
 var SHARE_URL='https://t.me/star_merge_game_bot/Merge';
 function myName(){try{var u=tg.initDataUnsafe.user;if(u&&u.first_name)return u.first_name.slice(0,12);}catch(e){}return 'Игрок';}
 function enc(o){try{return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}catch(e){return '';}}
-function dec(q){try{q=q.replace(/-/g,'+').replace(/_/g,'/');while(q.length%4)q+='=';var o=JSON.parse(decodeURIComponent(escape(atob(q))));if(o&&o.s>0&&o.p>=0)return {seed:o.s,score:o.p,name:String(o.n||'Игрок').slice(0,12)};}catch(e){}return null;}
+function dec(q){try{q=q.replace(/-/g,'+').replace(/_/g,'/');while(q.length%4)q+='=';var o=JSON.parse(decodeURIComponent(escape(atob(q))));if(o&&o.s>0&&o.p>=0)return {seed:o.s,score:o.p,name:String(o.n||'Игрок').slice(0,12),r:String(o.r||'')};}catch(e){}return null;}
 var curSeed=1,chal=null,beat=false,sp='';
 try{sp=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.start_param)||'';}catch(e){}
 if(!sp){try{sp=new URLSearchParams(location.search).get('c')||'';}catch(e){}}
@@ -81,7 +104,7 @@ function pieceLvl(){var r=rng();return r<0.4?0:r<0.7?1:r<0.9?2:3;}
 function shade(hex,a){var n=parseInt(hex.slice(1),16),r=(n>>16)+a,g=((n>>8)&255)+a,b=(n&255)+a;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return 'rgb('+r+','+g+','+b+')';}
 function start(m){
   mode=m;var sd=m==='daily'?hash(today()):(m==='duel'&&chal)?chal.seed:Math.floor(Math.random()*4294967294)+1;curSeed=sd;rng=mul(sd);beat=false;
-  bodies=[];parts=[];pops=[];score=0;chain=0;lastM=-9;ot=0;shake=0;charges=1;newBest=false;maxLv=0;aiming=false;
+  bodies=[];parts=[];pops=[];score=0;chain=0;lastM=-9;ot=0;shake=0;charges=1+Math.min(3,S.boomBonus||0);S.boomBonus=0;newBest=false;maxLv=0;aiming=false;
   cur=pieceLvl();nxt=pieceLvl();aimX=W/2;cd=0.3;hint=S.tut?0:1;state='play';
 }
 function burst(x,y,col,n,sp){for(var i=0;i<n;i++){var a=Math.random()*6.283,v=(0.3+Math.random())*(sp||260);parts.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,life:0.5+Math.random()*0.5,col:col,r:2+Math.random()*3.5});}}
@@ -180,8 +203,8 @@ function muteBtn(x,y){iconBtn(x,y,46,S.mute?'🔇':'🔊',function(){S.mute=S.mu
 function share(){
   var seed=state==='over'?curSeed:(S.bestSeed||0),sco=state==='over'?score:S.best;
   var base=SHARE_URL||(location.origin+location.pathname);
-  var pl=seed&&sco>0?enc({s:seed,p:sco,n:myName()}):'';
-  var url=pl?(SHARE_URL?SHARE_URL+'?startapp='+pl:base+'?c='+pl):base;
+  var pl=seed&&sco>0?enc({s:seed,p:sco,n:myName(),r:REF.id()}):'';
+  var url=pl?(SHARE_URL?SHARE_URL+'?startapp='+pl:base+'?c='+pl):(REF.link(SHARE_URL)||base);
   var text=pl?'⚔ Я набрал '+sco+' в «Звёздном сплаве». У тебя будут те же шары — побьёшь?':'✨ Звёздный сплав: сливай планеты до чёрной дыры!';
   var link='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);
   try{if(tg&&tg.openTelegramLink){tg.openTelegramLink(link);return;}}catch(e){}
@@ -234,7 +257,7 @@ function drawMenu(){
   ctx.font='bold 40px system-ui';stroked('Звёздный сплав',W/2,y+40,'#fff');ctx.font='15px system-ui';ctx.fillStyle='rgba(255,255,255,.8)';ctx.fillText('Соединяй одинаковые тела, дорасти до чёрной дыры',W/2,y+64);
   y+=205;if(chal){btn(bx,y,bw,56,'⚔ '+chal.name+': '+chal.score+' — побей!',function(){start('duel');},true);y+=68;btn(bx,y,bw,52,'▶ Обычная игра',function(){start('classic');});y+=64;}else{btn(bx,y,bw,56,'▶ Играть',function(){start('classic');},true);y+=68;}
   var done=S.daily.d===today()?S.daily.s:0;btn(bx,y,bw,52,'📅 Испытание дня'+(done?'  ·  '+done:''),function(){start('daily');});y+=64;
-  btn(bx,y,bw,48,S.best?'⚔ Бросить вызов другу':'👥 Позвать друга',share);y+=62;
+  btn(bx,y,bw,48,S.best?'⚔ Вызов другу (+💥 за друга)':'👥 Позвать друга (+💥)',share);y+=62;
   ctx.fillStyle='rgba(255,255,255,.75)';ctx.font='13px system-ui';ctx.fillText('Открыто тел: '+S.seen.length+' из 11  ·  рекорд '+S.best,W/2,y+8);
   var sz=Math.min(24,(bw-10*3)/11),sx=(W-(11*sz+10*3))/2;
   for(var k=0;k<11;k++){var on=S.seen.indexOf(k)>=0;ctx.globalAlpha=on?1:0.35;ctx.fillStyle=on?LV[k].c:'#8a7fb0';ctx.beginPath();ctx.arc(sx+k*(sz+3)+sz/2,y+30,sz/2,0,7);ctx.fill();}ctx.globalAlpha=1;
