@@ -39,10 +39,10 @@ try{tg=window.Telegram&&window.Telegram.WebApp;if(tg){tg.ready();tg.expand();try
 var LB=(function(){
 var URL_='https://goxmwpjepbfeyxchdtce.supabase.co/rest/v1/scores',KEY='sb_publishable_MoDF_SQuqqlB59Txr3imug_eWsMhnfP',GAME='starmerge';
 var el=null,rows=null,state='idle',myId=null;
-function T(){try{return window.Telegram&&window.Telegram.WebApp;}catch(e){return null;}}
-function uid(){if(myId)return myId;try{var u=T().initDataUnsafe.user;if(u&&u.id){myId='t'+u.id;return myId;}}catch(e){}
+function TGW(){try{return window.Telegram&&window.Telegram.WebApp;}catch(e){return null;}}
+function uid(){if(myId)return myId;try{var u=TGW().initDataUnsafe.user;if(u&&u.id){myId='t'+u.id;return myId;}}catch(e){}
 try{var k=localStorage.getItem('lb_uid');if(!k){k='a'+Math.random().toString(36).slice(2,10);localStorage.setItem('lb_uid',k);}myId=k;}catch(e){myId='a'+Math.random().toString(36).slice(2,10);}return myId;}
-function nm(){try{var u=T().initDataUnsafe.user;if(u&&u.first_name)return u.first_name.slice(0,12);}catch(e){}return T('Игрок');}
+function nm(){try{var u=TGW().initDataUnsafe.user;if(u&&u.first_name)return u.first_name.slice(0,12);}catch(e){}return T('Игрок');}
 function hd(extra){var h={apikey:KEY,'Content-Type':'application/json'};if(extra)for(var k in extra)h[k]=extra[k];return h;}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function load(cb){state='loading';fetch(URL_+'?game=eq.'+GAME+'&select=name,score,user_id&order=score.desc&limit=10',{headers:hd()}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(a){rows=a;state='ok';if(cb)cb();}).catch(function(){state='err';if(cb)cb();});}
@@ -66,11 +66,11 @@ return {open:open,submit:submit};
 })();
 var REF=(function(){
 var URL_='https://goxmwpjepbfeyxchdtce.supabase.co/rest/v1/scores',KEY='sb_publishable_MoDF_SQuqqlB59Txr3imug_eWsMhnfP';
-function T(){try{return window.Telegram&&window.Telegram.WebApp;}catch(e){return null;}}
-function id(){try{var u=T().initDataUnsafe.user;if(u&&u.id)return String(u.id);}catch(e){}return '';}
-function nm(){try{var u=T().initDataUnsafe.user;if(u&&u.first_name)return u.first_name.slice(0,12);}catch(e){}return T('Игрок');}
+function TGW(){try{return window.Telegram&&window.Telegram.WebApp;}catch(e){return null;}}
+function id(){try{var u=TGW().initDataUnsafe.user;if(u&&u.id)return String(u.id);}catch(e){}return '';}
+function nm(){try{var u=TGW().initDataUnsafe.user;if(u&&u.first_name)return u.first_name.slice(0,12);}catch(e){}return T('Игрок');}
 function hd(x){var h={apikey:KEY,'Content-Type':'application/json'};if(x)for(var k in x)h[k]=x[k];return h;}
-function startParam(){try{return T().initDataUnsafe.start_param||'';}catch(e){return '';}}
+function startParam(){try{return TGW().initDataUnsafe.start_param||'';}catch(e){return '';}}
 function fromParam(sp){return /^r\d+$/.test(sp||'')?sp.slice(1):'';}
 function link(base){var me=id();return (me&&base)?base+'?startapp=r'+me:base;}
 function register(inv){
